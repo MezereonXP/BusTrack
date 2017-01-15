@@ -15,6 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.mapapi.SDKInitializer;
 import com.example.mezereon.R;
 
 import java.util.ArrayList;
@@ -32,9 +35,11 @@ public class HomeActivity extends AppCompatActivity {
 
     private FragmentPagerAdapter myAdapter;
     private ArrayList<Fragment> myFragments=new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
         init();
