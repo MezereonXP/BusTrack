@@ -1,7 +1,9 @@
-package com.example.mezereon.bustrack;
+package Login.Activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.mezereon.bustrack.R;
 
 public class LoginActivity extends AppCompatActivity {
 
