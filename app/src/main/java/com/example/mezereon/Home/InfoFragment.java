@@ -1,13 +1,16 @@
 package com.example.mezereon.Home;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Switch;
 
 import com.example.mezereon.Home.Adapter.SettingAdapter;
 import com.example.mezereon.Home.Adapter.UserAdapter;
@@ -20,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,6 +46,8 @@ public class InfoFragment extends Fragment {
     private ListView userList,settingList;
     private UserAdapter userAdapter;
     private SettingAdapter settingAdapter;
+    private SharedPreferences hp;
+    private SharedPreferences.Editor editor;
 
     public InfoFragment() {
         // Required empty public constructor
@@ -71,6 +78,7 @@ public class InfoFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
@@ -89,16 +97,35 @@ public class InfoFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        settingList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch(position){
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        hp.edit().clear().commit();
+                        getActivity().finish();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
         return v;
     }
 
     private List<Map<String,Object>> getData() throws JSONException, IOException {
+        hp = this.getActivity().getSharedPreferences("USERINFO", MODE_PRIVATE);
+        editor = hp.edit();
+
         List<Map<String, Object>> list=new ArrayList<Map<String,Object>>();
         for (int i = 0; i < 1; i++) {
             Map<String, Object> map=new HashMap<String, Object>();
             map.put("userPic",R.mipmap.pic);
-            map.put("userName", "13032494890");
+            map.put("userName", hp.getString("PHONE","NONE"));
             list.add(map);
         }
         return list;

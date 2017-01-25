@@ -1,12 +1,16 @@
 package com.example.mezereon.Home;
 
+import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
@@ -26,11 +30,24 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.inner.GeoPoint;
+import com.example.mezereon.Home.Model.Chat;
 import com.example.mezereon.R;
+import com.google.gson.Gson;
+import com.hyphenate.EMMessageListener;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMMessage;
+import com.hyphenate.exceptions.HyphenateException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Dictionary;
 import java.util.List;
 
 import butterknife.Bind;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -51,6 +68,23 @@ public class MapFragment extends Fragment {
     private Spinner sp1,sp2;
     private MapView mv;
     private BaiduMap baiduMap;
+
+    private EMMessageListener msgListener;
+    private EMMessage message1;
+
+    private SharedPreferences hp;
+    private SharedPreferences.Editor editor;
+
+    private Handler handler=new Handler();
+    private Runnable runnable=new Runnable() {
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+            //要做的事情
+            mLocationClient.start();
+
+        }
+    };
 
     public LocationClient mLocationClient = null;
     public BDLocationListener myListener = new MyLocationListener();
@@ -85,6 +119,43 @@ public class MapFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+
+        msgListener = new EMMessageListener() {
+
+            @Override
+            public void onMessageReceived(final List<EMMessage> messages) {
+                //收到消息
+                Log.d("message",messages.toString());
+                message1=messages.get(0);
+
+                Log.d("from",""+message1.getFrom().toString());
+                Log.d("body",""+message1.getBody().toString());
+                Log.d("txt",message1.getBody().toString().split("\"")[1]);
+
+            }
+
+            @Override
+            public void onCmdMessageReceived(List<EMMessage> messages) {
+                //收到透传消息
+
+            }
+
+            @Override
+            public void onMessageRead(List<EMMessage> list) {
+
+            }
+
+            @Override
+            public void onMessageDelivered(List<EMMessage> list) {
+
+            }
+
+            @Override
+            public void onMessageChanged(EMMessage message, Object change) {
+                //消息状态变动
+            }
+        };
+        EMClient.getInstance().chatManager().addMessageListener(msgListener);
     }
 
     @Override
@@ -100,7 +171,8 @@ public class MapFragment extends Fragment {
         mLocationClient.registerLocationListener( myListener );
         initLocation();
         mLocationClient.start();
-
+        hp = this.getActivity().getSharedPreferences("USERINFO", MODE_PRIVATE);
+        editor = hp.edit();
         return v;
     }
 
@@ -196,7 +268,7 @@ public class MapFragment extends Fragment {
                     .zoom(18)
                     .build();
             //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
-
+            //Toast.makeText(getActivity(),location.getLocationDescribe(),Toast.LENGTH_SHORT).show();
 
             MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mMapStatus);
             //改变地图状态
@@ -210,7 +282,14 @@ public class MapFragment extends Fragment {
                     .icon(bitmap);
             //在地图上添加Marker，并显示
             baiduMap.addOverlay(option);
+            mLocationClient.stop();
 
+            handler.postDelayed(runnable, 8000);
+            if(hp.getString("PHONE","NONE").equals("13032494890")){
+                EMMessage message = EMMessage.createTxtSendMessage(lat+","+lon,"6044027781121");
+                message.setChatType(EMMessage.ChatType.GroupChat);
+                EMClient.getInstance().chatManager().sendMessage(message);
+            }
 
         }
     }
