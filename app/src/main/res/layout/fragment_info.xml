@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#c2c2c2"
+    android:id="@+id/info"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.example.mezereon.Home.InfoFragment">
 
@@ -14,16 +15,17 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="90dp"
             android:background="#c2c2c2"
             android:orientation="horizontal">
             <ListView
                 android:background="#FFFFFF"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/user"
                 android:divider="#C2C2C2"
+                android:elevation="5dp"
                 android:dividerHeight="20dp">
             </ListView>
 
@@ -31,7 +33,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#C2C2C2">
@@ -41,6 +43,7 @@
                 android:id="@+id/setting"
                 android:divider="#C2C2C2"
                 android:dividerHeight="2dp"
+                android:elevation="4dp"
                 android:background="#FFFFFF">
 
             </ListView>

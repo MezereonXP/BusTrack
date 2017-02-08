@@ -1,6 +1,8 @@
 package com.example.mezereon.Home;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Switch;
 
@@ -23,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -43,6 +48,7 @@ public class InfoFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private FrameLayout frameLayout;
     private ListView userList,settingList;
     private UserAdapter userAdapter;
     private SettingAdapter settingAdapter;
@@ -88,6 +94,7 @@ public class InfoFragment extends Fragment {
         View v=inflater.inflate(R.layout.fragment_info, container, false);
         userList= (ListView) v.findViewById(R.id.user);
         settingList= (ListView) v.findViewById(R.id.setting);
+        OverScrollDecoratorHelper.setUpOverScroll(settingList);
 
         try {
             userList.setAdapter(new UserAdapter(getActivity(),getData()));
@@ -106,8 +113,37 @@ public class InfoFragment extends Fragment {
                     case 1:
                         break;
                     case 2:
-                        hp.edit().clear().commit();
-                        getActivity().finish();
+                        new AlertDialog.Builder(getActivity()).setTitle("系统提示")//设置对话框标题
+
+                                .setMessage("确认退出登陆？")//设置显示的内5容
+
+                                .setPositiveButton("确定",new DialogInterface.OnClickListener() {//添加确定按钮
+
+
+
+                                    @Override
+
+                                    public void onClick(DialogInterface dialog, int which) {//确定按钮的响应事件
+
+                                        hp.edit().clear().commit();
+                                        getActivity().finish();
+
+                                    }
+
+                                }).setNegativeButton("取消",new DialogInterface.OnClickListener() {//添加返回按钮
+
+
+
+                            @Override
+
+                            public void onClick(DialogInterface dialog, int which) {//响应事件
+
+
+
+                            }
+
+                        }).show();//在按键响应事件中显示此对话框
+
                         break;
                     default:
                         break;
@@ -136,15 +172,15 @@ public class InfoFragment extends Fragment {
             Map<String, Object> map=new HashMap<String, Object>();
             switch (i){
                 case 0:
-                    map.put("pic",R.mipmap.ic_brightness_high_black_36dp);
+                    map.put("pic",R.mipmap.ic_brightness_high_grey600_36dp);
                     map.put("name", "系统设置");
                     break;
                 case 1:
-                    map.put("pic",R.mipmap.ic_storage_black_36dp);
+                    map.put("pic",R.mipmap.ic_storage_grey600_36dp);
                     map.put("name", "修改信息");
                     break;
                 case 2:
-                    map.put("pic",R.mipmap.ic_exit_to_app_black_36dp);
+                    map.put("pic",R.mipmap.ic_exit_to_app_grey600_36dp);
                     map.put("name", "退出登陆");
                     break;
             }

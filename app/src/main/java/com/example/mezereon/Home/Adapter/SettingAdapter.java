@@ -58,7 +58,6 @@ public class SettingAdapter extends BaseAdapter {
         ArticleItem item = new ArticleItem();
         if(convertView==null) {
             Log.e("convertView = ", " NULL");
-
             convertView = layoutInflater.inflate(R.layout.item_setting, null);
             item.pic = (ImageView) convertView.findViewById(R.id.pic);
             item.name = (TextView) convertView.findViewById(R.id.settingsName);

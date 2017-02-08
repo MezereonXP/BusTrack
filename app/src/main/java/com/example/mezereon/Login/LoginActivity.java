@@ -1,15 +1,19 @@
 package com.example.mezereon.Login;
 
+import android.app.ActivityOptions;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.transition.Explode;
 import android.util.Log;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -63,12 +67,16 @@ public class LoginActivity extends AppCompatActivity {
                                 EMClient.getInstance().chatManager().loadAllConversations();
                                 try {
                                     EMClient.getInstance().groupManager().joinGroup("6044027781121");
+                                    progressDialog.dismiss(); //关闭进度条
                                 } catch (HyphenateException e) {
                                     e.printStackTrace();
                                 }
+                                getWindow().setExitTransition(new Explode());
                                 intent.setClass(LoginActivity.this, HomeActivity.class);
                                 startActivity(intent);
                                 finish();
+
+
                             }
 
                             @Override
@@ -78,11 +86,10 @@ public class LoginActivity extends AppCompatActivity {
 
                             @Override
                             public void onError(int code, String message) {
-                                Toast.makeText(LoginActivity.this,"登陆服务器失败",Toast.LENGTH_SHORT).show();
+                               // Toast.makeText(LoginActivity.this,"登陆服务器失败",Toast.LENGTH_SHORT).show();
                             }
                         });
                     //刷新UI，显示数据，并关闭进度条
-                    progressDialog.dismiss(); //关闭进度条
                     break;
             }
         }
@@ -90,6 +97,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         setContentView(R.layout.activity_login);
 
         hp = this.getSharedPreferences("USERINFO", MODE_PRIVATE);
@@ -132,7 +140,9 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             handler.sendEmptyMessage(MESSAGETYPE_01);
                         }
+
                     }).start();
+
 
                 }else{
                     til.setErrorEnabled(true);
@@ -162,4 +172,5 @@ public class LoginActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(mobiles)) return false;
         else return mobiles.matches(telRegex);
     }
+
 }

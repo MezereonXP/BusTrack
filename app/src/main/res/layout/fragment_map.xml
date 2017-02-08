@@ -52,7 +52,7 @@
             android:id="@+id/spinner2"
             android:entries="@array/languages"/>
 
-        <com.baidu.mapapi.map.MapView
+        <com.baidu.mapapi.map.TextureMapView
             android:id="@+id/bmapView"
             android:layout_width="fill_parent"
             android:layout_height="350dp"

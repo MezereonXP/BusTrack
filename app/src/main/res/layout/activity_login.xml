@@ -14,6 +14,7 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:text="点击获取验证码"
+        android:elevation="12dp"
         android:id="@+id/appCompatButton"
         android:background="#FFFFFF"
         android:textColor="#009688"

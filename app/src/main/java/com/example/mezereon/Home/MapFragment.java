@@ -29,6 +29,7 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.TextureMapView;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.DistanceUtil;
 import com.example.mezereon.AlarmActivity;
@@ -67,7 +68,7 @@ public class MapFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private Spinner sp1,sp2;
-    private MapView mv;
+    private TextureMapView mv;
     private BaiduMap baiduMap;
 
     private LatLng cenpt;
@@ -127,6 +128,11 @@ public class MapFragment extends Fragment {
         return fragment;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mv.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -226,18 +232,12 @@ public class MapFragment extends Fragment {
 
         sp1= (Spinner) v.findViewById(R.id.spinner);
         sp2= (Spinner) v.findViewById(R.id.spinner2);
-        mv= (MapView) v.findViewById(R.id.bmapView);
+        mv= (TextureMapView) v.findViewById(R.id.bmapView);
         baiduMap=mv.getMap();
         mLocationClient = new LocationClient(getActivity().getApplicationContext());     //声明LocationClient类
         mLocationClient.registerLocationListener( myListener );
         initLocation();
 
-        LocationClientOption option = new LocationClientOption();
-        option.setOpenGps(true);// 打开gps
-        option.setCoorType("bd09ll"); // 设置坐标类型
-        option.setScanSpan(5000);        //设置发起定位请求的间隔时间，单位毫秒
-
-        mLocationClient.setLocOption(option);
         mLocationClient.start();
         hp = this.getActivity().getSharedPreferences("USERINFO", MODE_PRIVATE);
         editor = hp.edit();
@@ -423,18 +423,52 @@ public class MapFragment extends Fragment {
 
         }
     }
+
+    @Override
+    public void onResume() {
+        mv.onResume();
+        super.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        mv.onDestroy();
+        if(mLocationClient!=null){
+            mLocationClient.unRegisterLocationListener(myListener);
+            mLocationClient.stop();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        mv.onPause();
+        super.onPause();
+    }
+
     public void setUserVisibleHint(boolean isVisibleToUser) {        //核心方法，避免因Fragment跳转导致地图崩溃
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser == true) {
             // if this view is visible to user, start to request user location
             isFirst=true;
-            if(mLocationClient!=null)
-            mLocationClient.start();
+            if(mLocationClient!=null){
+                mLocationClient.registerLocationListener(myListener);
+                mLocationClient.start();
+                mLocationClient.requestLocation();
+                MapStatusUpdate mapStatus = MapStatusUpdateFactory.newLatLngZoom(cenpt, 18);
+                baiduMap.setMapStatus(mapStatus);
+            }else{
+                Log.d("tag","client is null");
+            }
+
         } else if (isVisibleToUser == false) {
             // if this view is not visible to user, stop to request user
             // location
-            if(mLocationClient!=null)
-            mLocationClient.stop();
+            if(mLocationClient!=null){
+                mLocationClient.unRegisterLocationListener(myListener);
+                mLocationClient.stop();
+            }
+
         }
     }
 
