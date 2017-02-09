@@ -116,6 +116,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         };
         vp.setAdapter(myAdapter);
+        vp.setOffscreenPageLimit(2);
 
     }
 
