@@ -134,20 +134,36 @@ public class LoginActivity extends AppCompatActivity {
                             try {
                                 Log.d("tag","here!");
                                 EMClient.getInstance().createAccount(et_id.getText().toString(),et_id.getText().toString());
-
+                                handler.sendEmptyMessage(MESSAGETYPE_01);
                             } catch (HyphenateException e) {
                                 e.printStackTrace();
                             }
-                            handler.sendEmptyMessage(MESSAGETYPE_01);
+
                         }
 
                     }).start();
-
-
                 }else{
                     til.setErrorEnabled(true);
                     til.setError("请输入正确的手机号码");
                 }
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(5000);
+                            if(progressDialog.isShowing()){
+                                progressDialog.dismiss();
+                                getWindow().setExitTransition(new Explode());
+                                intent.setClass(LoginActivity.this, HomeActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
             }
         });
 

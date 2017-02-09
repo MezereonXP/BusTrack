@@ -401,7 +401,7 @@ public class MapFragment extends Fragment {
             // 设置定位图层的配置（定位模式，是否允许方向信息，用户自定义定位图标）
             BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory
                     .fromResource(R.mipmap.ic_navigation_black_18dp);
-            MyLocationConfiguration config = new MyLocationConfiguration(null, true, mCurrentMarker);
+            MyLocationConfiguration config = new MyLocationConfiguration(null, false, mCurrentMarker);
             baiduMap.setMyLocationConfigeration(config);
 
 
