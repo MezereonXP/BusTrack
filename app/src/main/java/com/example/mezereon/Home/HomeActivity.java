@@ -27,6 +27,7 @@ import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.mapapi.SDKInitializer;
 import com.example.mezereon.R;
+import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMMessage;
 
@@ -41,7 +42,7 @@ public class HomeActivity extends AppCompatActivity {
     @Bind(R.id.tab_layout)
     TabLayout layout_tab;
     @Bind(R.id.viewpager)
-    ViewPager vp;
+    ViewPagerCompat vp;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     @Bind(R.id.title)
@@ -58,6 +59,7 @@ public class HomeActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         getWindow().setStatusBarColor(Color.parseColor("#004d40"));
         init();
+
         layout_tab.setTabMode(TabLayout.MODE_FIXED);
         layout_tab.setBackgroundColor(Color.parseColor("#FFFFFF"));
         layout_tab.setSelectedTabIndicatorHeight(3);
@@ -69,6 +71,9 @@ public class HomeActivity extends AppCompatActivity {
         layout_tab.getTabAt(0).setText("实时校车").setIcon(R.drawable.map);
         layout_tab.getTabAt(1).setText("预订座位").setIcon(R.drawable.order);
         layout_tab.getTabAt(2).setText("个人信息").setIcon(R.drawable.info);
+        if(!EMClient.getInstance().isLoggedInBefore()&&EMClient.getInstance().isConnected()){
+
+        }
 
         layout_tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
