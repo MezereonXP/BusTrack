@@ -52,7 +52,6 @@ import rx.functions.Action1;
 
 
 public class LoginActivity extends AppCompatActivity {
-
     @Bind(R.id.textInputEditText)
     EditText et_id;
     @Bind(R.id.textInputEditText2)
