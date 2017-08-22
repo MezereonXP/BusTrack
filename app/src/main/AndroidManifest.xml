@@ -46,7 +46,7 @@
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="g5HswFKwDfH2s76wTvk3inmF2WAOX44L" />
+            android:value="psQs5j6PKiekU9QLEkros6b9TCqUazaE" />
         <meta-data
             android:name="EASEMOB_APPKEY"
             android:value="1105161122178335#busstack" />
