@@ -18,6 +18,7 @@ import android.widget.Switch;
 import com.example.mezereon.Home.Adapter.SettingAdapter;
 import com.example.mezereon.Home.Adapter.UserAdapter;
 import com.example.mezereon.R;
+import com.hyphenate.chat.EMClient;
 
 import org.json.JSONException;
 
@@ -125,6 +126,7 @@ public class InfoFragment extends Fragment {
 
                                     public void onClick(DialogInterface dialog, int which) {//确定按钮的响应事件
 
+                                        EMClient.getInstance().logout(true);
                                         hp.edit().clear().commit();
                                         getActivity().finish();
 

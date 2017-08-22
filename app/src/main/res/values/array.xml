@@ -4,4 +4,14 @@
         <item>南湖校区</item>
         <item>浑南校区</item>
     </string-array>
+    <string-array name="place">
+        <item>十三号街站</item>
+        <item>中央大街站</item>
+        <item>七号街站</item>
+        <item>四号街站</item>
+        <item>张士站</item>
+        <item>开发大道站</item>
+        <item>于洪广场站</item>
+        <item>迎宾路站</item>
+    </string-array>
 </resources>

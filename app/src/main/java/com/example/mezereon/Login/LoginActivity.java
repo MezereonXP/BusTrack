@@ -25,6 +25,7 @@ import com.example.mezereon.R;
 import com.gospelware.liquidbutton.LiquidButton;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMGroupManager;
 import com.hyphenate.chat.EMOptions;
 import com.hyphenate.exceptions.HyphenateException;
 import com.jakewharton.rxbinding.view.RxView;
@@ -63,19 +64,14 @@ public class LoginActivity extends AppCompatActivity {
                         EMClient.getInstance().login(hp.getString("PHONE","none"),hp.getString("PHONE","none"),new EMCallBack() {//回调
                             @Override
                             public void onSuccess() {
+                                Log.d("onsuccess","ok");
                                 EMClient.getInstance().groupManager().loadAllGroups();
                                 EMClient.getInstance().chatManager().loadAllConversations();
-                                try {
-                                    EMClient.getInstance().groupManager().joinGroup("6044027781121");
-                                    progressDialog.dismiss(); //关闭进度条
-                                } catch (HyphenateException e) {
-                                    e.printStackTrace();
-                                }
+                                progressDialog.dismiss(); //关闭进度条
                                 getWindow().setExitTransition(new Explode());
                                 intent.setClass(LoginActivity.this, HomeActivity.class);
                                 startActivity(intent);
                                 finish();
-
                             }
 
                             @Override
@@ -90,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                         });
                     //刷新UI，显示数据，并关闭进度条
                     break;
+                
             }
         }
     };
@@ -120,7 +117,6 @@ public class LoginActivity extends AppCompatActivity {
         RxView.clicks(btn_login).subscribe(new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
-
                 if (!et_id.getText().equals("")&&isMobileNO(et_id.getText().toString())) {
                     editor.putString("PHONE",et_id.getText().toString());
                     editor.commit();
@@ -136,6 +132,7 @@ public class LoginActivity extends AppCompatActivity {
                                 handler.sendEmptyMessage(MESSAGETYPE_01);
                             } catch (HyphenateException e) {
                                 e.printStackTrace();
+                                handler.sendEmptyMessage(MESSAGETYPE_01);
                             }
 
                         }
@@ -146,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
                     til.setError("请输入正确的手机号码");
                 }
 
-                new Thread(new Runnable() {
+                /*new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -162,7 +159,7 @@ public class LoginActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-                }).start();
+                }).start();*/
             }
         });
 

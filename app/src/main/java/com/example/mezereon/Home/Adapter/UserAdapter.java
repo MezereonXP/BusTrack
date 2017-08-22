@@ -19,8 +19,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by Mezereon on 2017/1/15.
  */
 public class UserAdapter extends BaseAdapter {
-
-
     private List<Map<String, Object>> data;
     private LayoutInflater layoutInflater;
     private Context context;

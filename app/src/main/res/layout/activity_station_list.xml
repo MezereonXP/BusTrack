@@ -2,15 +2,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_host"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.mezereon.Home.HomeActivity">
+    tools:context="com.example.mezereon.Home.StationListActivity"
+    android:id="@+id/relative">
+
 
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar1"
         android:elevation="10dp"
         android:background="#00695c">
         <TextView
@@ -18,31 +19,16 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginLeft="30dp"
-            android:text="实时"
+            android:text="校车位置(实时)"
             android:textSize="19sp"
             android:textColor="#FFFFFF"
             android:gravity="center_vertical"
             />
     </android.support.v7.widget.Toolbar>
-    <com.example.mezereon.Home.ViewPagerCompat
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/id_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/viewpager"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/tab_layout"
-        android:layout_below="@+id/toolbar">
-
-    </com.example.mezereon.Home.ViewPagerCompat>
-
-    <android.support.design.widget.TabLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:id="@+id/tab_layout"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-    </android.support.design.widget.TabLayout>
-
-
+        android:layout_height="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/toolbar1"/>
 </RelativeLayout>

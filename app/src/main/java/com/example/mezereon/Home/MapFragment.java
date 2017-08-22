@@ -4,20 +4,25 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.location.Poi;
+import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -36,11 +41,15 @@ import com.example.mezereon.AlarmActivity;
 import com.example.mezereon.R;
 import com.hyphenate.EMMessageListener;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMGroupManager;
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.exceptions.HyphenateException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.baidu.location.LocationClientOption.LOC_SENSITIVITY_MIDDLE;
 
 
 /**
@@ -55,12 +64,14 @@ public class MapFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private boolean isFirst=true;
-
+    //
+    private boolean judgement = true;
+    //判断是否无网络连接
+    private boolean hasNetwork;
     private double latA=23.369027;
     private double lonA=116.716134;
     private double latB=23.3681810022;
     private double lonB=116.7165892029;
-
     private double speedOfBus=0.7;
     LatLng pt1 = new LatLng(latA, lonA);
     LatLng pt2 = new LatLng(latB, lonB);
@@ -86,12 +97,15 @@ public class MapFragment extends Fragment {
     private Spinner goal;
     private Button predict;
     private Button setAlarm;
-
+    private ImageButton imageButton;
     double templat;
     double templon;
     private LatLng temp;
     private boolean isSet=false;
-
+    //站点经纬度数组
+    private ArrayList<LatLng> stationList = new ArrayList<LatLng>();
+    //站点名字数组
+    private ArrayList<String> stationNameList = new ArrayList<String>();
     private Handler handler=new Handler();
     private Runnable runnable=new Runnable() {
         @Override
@@ -123,6 +137,7 @@ public class MapFragment extends Fragment {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
+
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -137,6 +152,21 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.d("join","success");
+                    Log.d("user",EMClient.getInstance().getCurrentUser());
+                    EMClient.getInstance().groupManager().joinGroup("6044027781121");
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }).start();
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -162,13 +192,13 @@ public class MapFragment extends Fragment {
                 //构建Marker图标
                 temp=new LatLng(templat,templon);
                 BitmapDescriptor bitmap = BitmapDescriptorFactory
-                    .fromResource(R.mipmap.ic_directions_bus_black_18dp);
+                        .fromResource(R.mipmap.ic_directions_bus_black_18dp);
                 //构建MarkerOption，用于在地图上添加Marker
                 OverlayOptions option = new MarkerOptions()
-                    .position(temp)
-                    .icon(bitmap);
+                        .position(temp)
+                        .icon(bitmap);
                 //在地图上添加Marker，并显示
-                baiduMap.addOverlay(option);
+               baiduMap.addOverlay(option);
                 if(goal.getSelectedItemPosition()==1){
                     Log.d("tag","here1");
                     if(isSet&&DistanceUtil.getDistance(temp,pt1)<5){
@@ -193,22 +223,20 @@ public class MapFragment extends Fragment {
             @Override
             public void onCmdMessageReceived(List<EMMessage> messages) {
                 //收到透传消息
-
+                Log.d("message",messages.toString());
             }
 
             @Override
-            public void onMessageRead(List<EMMessage> list) {
-
-            }
+            public void onMessageRead(List<EMMessage> list) { }
 
             @Override
             public void onMessageDelivered(List<EMMessage> list) {
-
             }
 
             @Override
             public void onMessageChanged(EMMessage message, Object change) {
                 //消息状态变动
+                Log.d("message",message.toString());
             }
         };
         EMClient.getInstance().chatManager().addMessageListener(msgListener);
@@ -219,12 +247,14 @@ public class MapFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v=inflater.inflate(R.layout.fragment_map, container, false);
+        initialStationList();
+        initialStationNameList();
         alertDialogBuilder=new AlertDialog.Builder(getActivity());
         alertDialog = alertDialogBuilder.create();
 
         mLocat= (Spinner) v.findViewById(R.id.spinner);
         goal= (Spinner) v.findViewById(R.id.spinner2);
-
+        imageButton = (ImageButton) v.findViewById(R.id.imageButton);
         mLocat.setEnabled(false);
 
         predict= (Button) v.findViewById(R.id.appCompatButton3);
@@ -237,11 +267,39 @@ public class MapFragment extends Fragment {
         mLocationClient = new LocationClient(getActivity().getApplicationContext());     //声明LocationClient类
         mLocationClient.registerLocationListener( myListener );
         initLocation();
-
         mLocationClient.start();
         hp = this.getActivity().getSharedPreferences("USERINFO", MODE_PRIVATE);
         editor = hp.edit();
+        baiduMap.clear();
+        //构建Marker图标
+        BitmapDescriptor bitmap = BitmapDescriptorFactory
+                .fromResource(R.mipmap.ic_station);
+        //构建MarkerOption，用于在地图上添加Marker
+        OverlayOptions option;
+        for(LatLng latlng:stationList){
+            option = new MarkerOptions()
+                    .position(latlng)
+                    .icon(bitmap);
+            //在地图上添加Marker，并显示
+            baiduMap.addOverlay(option);
+        }
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(cenpt!=null) {
+                    MapStatus mMapStatus = new MapStatus.Builder()
+                            .target(cenpt)
+                            .zoom(18)
+                            .build();
+                    //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
+                    //Toast.makeText(getActivity(),location.getLocationDescribe(),Toast.LENGTH_SHORT).show();
 
+                    MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mMapStatus);
+                    //改变地图状态
+                    baiduMap.animateMapStatus(mMapStatusUpdate);
+                }
+            }
+        });
         predict.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -279,6 +337,7 @@ public class MapFragment extends Fragment {
         );//可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
         option.setCoorType("bd09ll");//可选，默认gcj02，设置返回的定位结果坐标系
         int span=5000;
+        //option.setOpenAutoNotifyMode(5000,100, LOC_SENSITIVITY_MIDDLE);
         option.setScanSpan(span);//可选，默认0，即仅定位一次，设置发起定位请求的间隔需要大于等于1000ms才是有效的
         option.setIsNeedAddress(true);//可选，设置是否需要地址信息，默认不需要
         option.setOpenGps(true);//可选，默认false,设置是否使用gps
@@ -289,7 +348,7 @@ public class MapFragment extends Fragment {
         option.SetIgnoreCacheException(false);//可选，默认false，设置是否收集CRASH信息，默认收集
         option.setEnableSimulateGps(false);//可选，默认false，设置是否需要过滤GPS仿真结果，默认需要
         mLocationClient.setLocOption(option);
-    }
+}
 
 
 
@@ -331,15 +390,25 @@ public class MapFragment extends Fragment {
                 sb.append(location.getOperators());
                 sb.append("\ndescribe : ");
                 sb.append("网络定位成功");
+                hasNetwork = true;
+                judgement = true;
             } else if (location.getLocType() == BDLocation.TypeOffLineLocation) {// 离线定位结果
                 sb.append("\ndescribe : ");
                 sb.append("离线定位成功，离线定位结果也是有效的");
             } else if (location.getLocType() == BDLocation.TypeServerError) {
                 sb.append("\ndescribe : ");
                 sb.append("服务端网络定位失败，可以反馈IMEI号和大体定位时间到loc-bugs@baidu.com，会有人追查原因");
+                hasNetwork = false;
+                //Toast.makeText(getContext(), "定位需要wlan功能,请打开wlan", Toast.LENGTH_SHORT).show();
+                //startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
             } else if (location.getLocType() == BDLocation.TypeNetWorkException) {
                 sb.append("\ndescribe : ");
                 sb.append("网络不同导致定位失败，请检查网络是否通畅");
+                if(judgement) {
+                    Toast.makeText(getContext(), "暂时无法获取当前位置，请联网后重试", Toast.LENGTH_LONG).show();
+                    judgement = false;
+                }
+                hasNetwork = false;
             } else if (location.getLocType() == BDLocation.TypeCriteriaException) {
                 sb.append("\ndescribe : ");
                 sb.append("无法获取有效定位依据导致定位失败，一般是由于手机的原因，处于飞行模式下一般会造成这种结果，可以试着重启手机");
@@ -355,64 +424,41 @@ public class MapFragment extends Fragment {
                     sb.append(p.getId() + " " + p.getName() + " " + p.getRank());
                 }
             }
-            Log.i("BaiduLocationApiDem", sb.toString());
+            //Log.i("BaiduLocationApiDem", sb.toString());
                 double lat=location.getLatitude();
-                double lon=location.getLongitude();
+            double lon=location.getLongitude();
             cenpt = new LatLng(lat,lon);
             //定义地图状态
-            if(isFirst==true) {
-                MapStatus mMapStatus = new MapStatus.Builder()
-                        .target(cenpt)
-                        .zoom(18)
-                        .build();
-                //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
-                //Toast.makeText(getActivity(),location.getLocationDescribe(),Toast.LENGTH_SHORT).show();
+            if(hasNetwork) {
+                if (isFirst == true) {
+                    MapStatus mMapStatus = new MapStatus.Builder()
+                            .target(cenpt)
+                            .zoom(18)
+                            .build();
+                    //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
+                    //Toast.makeText(getActivity(),location.getLocationDescribe(),Toast.LENGTH_SHORT).show();
 
-                MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mMapStatus);
-                //改变地图状态
-                baiduMap.setMapStatus(mMapStatusUpdate);
-                isFirst=false;
+                    MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mMapStatus);
+                    //改变地图状态
+                    baiduMap.setMapStatus(mMapStatusUpdate);
+                    isFirst = false;
+                }
+
+                // 开启定位图层
+                baiduMap.setMyLocationEnabled(true);
+                // 构造定位数据
+                MyLocationData locData = new MyLocationData.Builder()
+                        .latitude(location.getLatitude())
+                        .longitude(location.getLongitude()).build();
+                // 设置定位数据
+                baiduMap.setMyLocationData(locData);
+                // 设置定位图层的配置（定位模式，是否允许方向信息，用户自定义定位图标）
+                BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory
+                        .fromResource(R.mipmap.ic_navigation_black_18dp);
+                MyLocationConfiguration config = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, false, mCurrentMarker);
+                baiduMap.setMyLocationConfigeration(config);
             }
-
-//            if(baiduMap.getMaxZoomLevel()!=18){
-//                MapStatusUpdate msu=MapStatusUpdateFactory.newLatLng(cenpt);
-//                baiduMap.animateMapStatus(msu);
-//            }
-//            //构建Marker图标
-//            BitmapDescriptor bitmap = BitmapDescriptorFactory
-//                    .fromResource(R.mipmap.ic_pin_drop_black_36dp);
-//            //构建MarkerOption，用于在地图上添加Marker
-//            OverlayOptions option = new MarkerOptions()
-//                    .position(cenpt)
-//                    .icon(bitmap);
-//            //在地图上添加Marker，并显示
-//            baiduMap.addOverlay(option);
-
-            // 开启定位图层
-            baiduMap.setMyLocationEnabled(true);
-            // 构造定位数据
-            MyLocationData locData = new MyLocationData.Builder()
-                    .accuracy(location.getRadius())
-                    // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(100).latitude(location.getLatitude())
-                    .longitude(location.getLongitude()).build();
-            // 设置定位数据
-            baiduMap.setMyLocationData(locData);
-            // 设置定位图层的配置（定位模式，是否允许方向信息，用户自定义定位图标）
-            BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory
-                    .fromResource(R.mipmap.ic_navigation_black_18dp);
-            MyLocationConfiguration config = new MyLocationConfiguration(null, false, mCurrentMarker);
-            baiduMap.setMyLocationConfigeration(config);
-
-
-
-            if(DistanceUtil.getDistance(pt1,cenpt)>=DistanceUtil.getDistance(pt2,cenpt)){
-                mLocat.setSelection(1);
-                goal.setSelection(0);
-            }else{
-                mLocat.setSelection(0);
-                goal.setSelection(1);
-            }
+            setMiniDistanceStation();
             //mLocationClient.stop();
             //handler.postDelayed(runnable, 2000);
             if(hp.getString("PHONE","NONE").equals("13032494890")){
@@ -423,6 +469,18 @@ public class MapFragment extends Fragment {
 
         }
     }
+
+    private void setMiniDistanceStation() {
+        int min = 0;
+        for(int i = 0;i < stationList.size();i++){
+            if(DistanceUtil.getDistance(stationList.get(i),cenpt)<=DistanceUtil.getDistance(stationList.get(min),cenpt)){
+                //Log.i("text", stationNameList.get(i)+"  "+ DistanceUtil.getDistance(stationList.get(i),cenpt));
+                min = i;
+            }
+        }
+        mLocat.setSelection(min);
+    }
+
 
     @Override
     public void onResume() {
@@ -470,6 +528,22 @@ public class MapFragment extends Fragment {
             }
 
         }
+    }
+    //初始化站点经纬度
+    public void initialStationList(){
+        stationList.add(new LatLng(41.771751,123.236737));
+        stationList.add(new LatLng(41.771775,123.248797));
+        stationList.add(new LatLng(41.771492,123.266045));
+        stationList.add(new LatLng(41.771815,123.283741));
+        stationList.add(new LatLng(41.777292,123.300459));
+    }
+    //初始化站点名字
+    public void initialStationNameList(){
+        stationNameList.add("十三号街");
+        stationNameList.add("中央大街");
+        stationNameList.add("七号街");
+        stationNameList.add("四号街");
+        stationNameList.add("张士");
     }
 
 }

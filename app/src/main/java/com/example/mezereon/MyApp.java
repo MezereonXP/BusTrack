@@ -12,12 +12,15 @@ import android.app.Application;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
 
 import java.util.Iterator;
 import java.util.List;
+
+import static android.Manifest.permission.READ_PHONE_STATE;
 
 
 /**

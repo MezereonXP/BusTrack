@@ -1,4 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,48 +10,48 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:text="当前距离最近站点："
-            android:textSize="16sp"
-            android:textColor="#333333"
+            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/textView2"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/bmapView"
             android:layout_marginLeft="40dp"
             android:layout_marginStart="40dp"
             android:layout_marginTop="26dp"
-            android:layout_below="@+id/bmapView"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:text="当前距离最近站点："
+            android:textColor="#333333"
+            android:textSize="16sp" />
 
         <TextView
-            android:text="目的站点："
-            android:textColor="#333333"
-            android:textSize="16sp"
+            android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="31dp"
-            android:id="@+id/textView4"
-            android:layout_below="@+id/textView2"
+            android:layout_alignEnd="@+id/textView2"
             android:layout_alignRight="@+id/textView2"
-            android:layout_alignEnd="@+id/textView2" />
+            android:layout_below="@+id/textView2"
+            android:layout_marginTop="31dp"
+            android:text="目的站点："
+            android:textColor="#333333"
+            android:textSize="16sp" />
 
         <Spinner
+            android:id="@+id/spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/textView4"
-            android:layout_toRightOf="@+id/textView2"
             android:layout_toEndOf="@+id/textView2"
-            android:id="@+id/spinner"
-            android:entries="@array/languages"/>
+            android:layout_toRightOf="@+id/textView2"
+            android:entries="@array/place" />
 
         <Spinner
+            android:id="@+id/spinner2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/textView4"
-            android:layout_toRightOf="@+id/textView4"
             android:layout_toEndOf="@+id/textView4"
-            android:id="@+id/spinner2"
-            android:entries="@array/languages"/>
+            android:layout_toRightOf="@+id/textView4"
+            android:entries="@array/place" />
 
         <com.baidu.mapapi.map.TextureMapView
             android:id="@+id/bmapView"
@@ -59,30 +60,40 @@
             android:clickable="true" />
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/appCompatButton3"
             android:layout_width="180dp"
             android:layout_height="wrap_content"
-            android:text="预测到达时间"
-            android:textColor="#FFFFFF"
-            android:textSize="19sp"
-            android:background="#009688"
-            android:id="@+id/appCompatButton3"
-
             android:layout_alignBaseline="@+id/appCompatButton4"
             android:layout_alignBottom="@+id/appCompatButton4"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+
+            android:background="#009688"
+            android:text="预测到达时间"
+            android:textColor="#FFFFFF"
+            android:textSize="19sp" />
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/appCompatButton4"
             android:layout_width="180dp"
             android:layout_height="wrap_content"
-            android:text="设置提醒"
-            android:layout_marginBottom="5dp"
-            android:textColor="#009688"
-            android:textSize="19sp"
-            android:background="#FFFFFF"
-            android:id="@+id/appCompatButton4"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="5dp"
+            android:background="#FFFFFF"
+            android:text="设置提醒"
+            android:textColor="#009688"
+            android:textSize="19sp" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="51dp"
+            android:background="@color/cardview_light_background"
+            app:srcCompat="@mipmap/position"
+            android:layout_above="@+id/textView2"
             android:layout_alignParentStart="true" />
 
 
