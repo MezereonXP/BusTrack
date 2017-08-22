@@ -5,6 +5,6 @@
         android:id="@+id/miCompose"
         android:icon="@drawable/ic_more"
         app:showAsAction="ifRoom"
-        android:title="校车信息">
+        android:title="Compose">
     </item>
 </menu>

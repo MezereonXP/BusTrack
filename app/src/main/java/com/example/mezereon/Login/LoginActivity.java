@@ -1,13 +1,19 @@
 package com.example.mezereon.Login;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.ActivityOptions;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.StrictMode;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,13 +28,23 @@ import android.widget.Toast;
 import com.example.mezereon.Home.HomeActivity;
 import com.example.mezereon.MyApp;
 import com.example.mezereon.R;
+import com.example.mezereon.Tool.API;
 import com.gospelware.liquidbutton.LiquidButton;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMGroupManager;
 import com.hyphenate.chat.EMOptions;
 import com.hyphenate.exceptions.HyphenateException;
 import com.jakewharton.rxbinding.view.RxView;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -55,38 +71,43 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences hp;
     private SharedPreferences.Editor editor;
     private ProgressDialog progressDialog = null;
+    private AlertDialog alertDialog = null;
     private static final int MESSAGETYPE_01 = 0x0001;
+    private static final int MESSAGETYPE_02 = 0x0002;
     private Handler handler = new Handler() {
 
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MESSAGETYPE_01:
                         EMClient.getInstance().login(hp.getString("PHONE","none"),hp.getString("PHONE","none"),new EMCallBack() {//回调
-                            @Override
-                            public void onSuccess() {
-                                Log.d("onsuccess","ok");
-                                EMClient.getInstance().groupManager().loadAllGroups();
-                                EMClient.getInstance().chatManager().loadAllConversations();
-                                progressDialog.dismiss(); //关闭进度条
-                                getWindow().setExitTransition(new Explode());
-                                intent.setClass(LoginActivity.this, HomeActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
+                                @Override
+                                public void onSuccess() {
+                                    EMClient.getInstance().groupManager().loadAllGroups();
+                                    EMClient.getInstance().chatManager().loadAllConversations();
+                                    progressDialog.dismiss(); //关闭进度条
+                                    getWindow().setExitTransition(new Explode());
+                                    intent.setClass(LoginActivity.this, HomeActivity.class);
+                                    startActivity(intent);
+                                    finish();
 
-                            @Override
-                            public void onProgress(int progress, String status) {
-                                Log.d("progress",progress+"");
-                            }
+                                }
 
-                            @Override
-                            public void onError(int code, String message) {
-                               // Toast.makeText(LoginActivity.this,"登陆服务器失败",Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                                @Override
+                                public void onProgress(int progress, String status) {
+                                    Log.d("progress",progress+"");
+                                }
+
+                                @Override
+                                public void onError(int code, String message) {
+                                   //Toast.makeText(LoginActivity.this,"登陆服务器失败",Toast.LENGTH_SHORT).show();
+                                }
+                            });
                     //刷新UI，显示数据，并关闭进度条
                     break;
-                
+                case MESSAGETYPE_02:
+                    showTheWayToRegist();
+                    break;
+
             }
         }
     };
@@ -95,6 +116,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         setContentView(R.layout.activity_login);
+        progressDialog=new ProgressDialog(LoginActivity.this);
 
         hp = this.getSharedPreferences("USERINFO", MODE_PRIVATE);
         editor = hp.edit();
@@ -117,59 +139,68 @@ public class LoginActivity extends AppCompatActivity {
         RxView.clicks(btn_login).subscribe(new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
-                if (!et_id.getText().equals("")&&isMobileNO(et_id.getText().toString())) {
+                Log.d("tag1",et_id.getText().equals("")+"");
+                Log.d("tag2",isMobileNO(et_id.getText().toString())+"");
+                if ((!et_id.getText().equals(""))&&isMobileNO(et_id.getText().toString())) {
                     editor.putString("PHONE",et_id.getText().toString());
                     editor.commit();
-                    progressDialog=new ProgressDialog(LoginActivity.this);
                     progressDialog.setMessage("登陆中");
                     progressDialog.show();
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            try {
-                                Log.d("tag","here!");
-                                EMClient.getInstance().createAccount(et_id.getText().toString(),et_id.getText().toString());
-                                handler.sendEmptyMessage(MESSAGETYPE_01);
-                            } catch (HyphenateException e) {
-                                e.printStackTrace();
-                                handler.sendEmptyMessage(MESSAGETYPE_01);
-                            }
-
+                            Log.d("tag","here!");
+                            isRegisted(et_id.getText().toString());
                         }
 
                     }).start();
-                }else{
+                } else{
                     til.setErrorEnabled(true);
                     til.setError("请输入正确的手机号码");
                 }
-
-                /*new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(5000);
-                            if(progressDialog.isShowing()){
-                                progressDialog.dismiss();
-                                getWindow().setExitTransition(new Explode());
-                                intent.setClass(LoginActivity.this, HomeActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();*/
             }
         });
 
-        RxView.clicks(btn_getConfirm).subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
 
-            }
-        });
     }
+
+    private void showTheWayToRegist() {
+        progressDialog.dismiss();
+        alertDialog=new AlertDialog.Builder(LoginActivity.this)
+                .setTitle("前往注册界面")
+                .setMessage("确定吗？")
+                .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getWindow().setExitTransition(new Explode());
+                        intent.setClass(LoginActivity.this, SignActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        alertDialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    private void isRegisted(String s) {
+        String result="";
+        try {
+            result = API.isRegisterForHttpGet(s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(result.equals("1")){
+            handler.sendEmptyMessage(MESSAGETYPE_01);
+        }else{
+            handler.sendEmptyMessage((MESSAGETYPE_02));
+        }
+    }
+
     /**
      * 验证手机格式
      */
@@ -184,5 +215,6 @@ public class LoginActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(mobiles)) return false;
         else return mobiles.matches(telRegex);
     }
+
 
 }

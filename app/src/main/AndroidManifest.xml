@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mezereon">
 
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+
     <!-- 这个权限用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- 这个权限用于访问GPS定位 -->
@@ -39,11 +41,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Login.SignActivity" />
         <activity android:name=".Home.HomeActivity" />
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="psQs5j6PKiekU9QLEkros6b9TCqUazaE" />
+            android:value="g5HswFKwDfH2s76wTvk3inmF2WAOX44L" />
         <meta-data
             android:name="EASEMOB_APPKEY"
             android:value="1105161122178335#busstack" />
@@ -68,9 +71,10 @@
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
-            android:process=":remote"></service>
+            android:process=":remote" />
 
-        <activity android:name=".AlarmActivity"></activity>
+        <activity android:name=".AlarmActivity" />
+        <activity android:name=".Home.StationListActivity"></activity>
     </application>
 
 </manifest>

@@ -41,7 +41,6 @@ import com.example.mezereon.AlarmActivity;
 import com.example.mezereon.R;
 import com.hyphenate.EMMessageListener;
 import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMGroupManager;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.exceptions.HyphenateException;
 
@@ -137,7 +136,6 @@ public class MapFragment extends Fragment {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
-
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -152,19 +150,15 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Log.d("join","success");
-                    Log.d("user",EMClient.getInstance().getCurrentUser());
                     EMClient.getInstance().groupManager().joinGroup("6044027781121");
                 } catch (HyphenateException e) {
                     e.printStackTrace();
                 }
             }
-
         }).start();
 
         if (getArguments() != null) {
@@ -223,20 +217,22 @@ public class MapFragment extends Fragment {
             @Override
             public void onCmdMessageReceived(List<EMMessage> messages) {
                 //收到透传消息
-                Log.d("message",messages.toString());
+
             }
 
             @Override
-            public void onMessageRead(List<EMMessage> list) { }
+            public void onMessageRead(List<EMMessage> list) {
+
+            }
 
             @Override
             public void onMessageDelivered(List<EMMessage> list) {
+
             }
 
             @Override
             public void onMessageChanged(EMMessage message, Object change) {
                 //消息状态变动
-                Log.d("message",message.toString());
             }
         };
         EMClient.getInstance().chatManager().addMessageListener(msgListener);
@@ -424,7 +420,7 @@ public class MapFragment extends Fragment {
                     sb.append(p.getId() + " " + p.getName() + " " + p.getRank());
                 }
             }
-            //Log.i("BaiduLocationApiDem", sb.toString());
+            Log.i("BaiduLocationApiDem", sb.toString());
                 double lat=location.getLatitude();
             double lon=location.getLongitude();
             cenpt = new LatLng(lat,lon);
@@ -474,7 +470,7 @@ public class MapFragment extends Fragment {
         int min = 0;
         for(int i = 0;i < stationList.size();i++){
             if(DistanceUtil.getDistance(stationList.get(i),cenpt)<=DistanceUtil.getDistance(stationList.get(min),cenpt)){
-                //Log.i("text", stationNameList.get(i)+"  "+ DistanceUtil.getDistance(stationList.get(i),cenpt));
+                Log.i("text", stationNameList.get(i)+"  "+ DistanceUtil.getDistance(stationList.get(i),cenpt));
                 min = i;
             }
         }
