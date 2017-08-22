@@ -19,10 +19,3 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
-android {
-    buildToolsVersion '24.0.2'
-    compileSdkVersion 24
-}
-dependencies {
-}
