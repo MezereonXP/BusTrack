@@ -84,7 +84,7 @@ public class HomeActivity extends AppCompatActivity {
 
         }
         //申请定位，网络，读取手机状态权限
-        PackageManager pm = getPackageManager();
+        /*PackageManager pm = getPackageManager();
         boolean permission = (PackageManager.PERMISSION_GRANTED ==
                 pm.checkPermission("android.permission.READ_PHONE_STATE", "packageName"));
         if (permission) {
@@ -98,7 +98,7 @@ public class HomeActivity extends AppCompatActivity {
                         Manifest.permission.READ_PHONE_STATE ,Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE},BAIDU_READ_PHONE_STATE);
 
             }
-        }
+        }*/
         layout_tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -110,6 +110,7 @@ public class HomeActivity extends AppCompatActivity {
                 }else if(name.equals("个人信息")){
                     title.setText("个人");
                 }
+
             }
 
             @Override
